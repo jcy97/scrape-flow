@@ -55,7 +55,7 @@ function CreateWorkflowDialog({ triggerText }: { triggerText: string }) {
   return (
     <Dialog
       open={open}
-      onOpenChange={(oepn) => {
+      onOpenChange={(open) => {
         form.reset();
         setOpen(open);
       }}

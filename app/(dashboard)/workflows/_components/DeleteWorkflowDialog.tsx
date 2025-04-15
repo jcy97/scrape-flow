@@ -59,14 +59,15 @@ function DeleteWorkflowDialog({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel onClick={() => setConfirmText("")}>
+            Cancel
+          </AlertDialogCancel>
           {/* 워크플로우명이 입력되어야 활성화됨 */}
           <AlertDialogAction
             disabled={confirmText !== workflowName || deleteMutation.isPending}
             className="bg-destructive text-destructive-foreground
             hover:bg-destructive/90"
-            onClick={(e) => {
-              e.stopPropagation();
+            onClick={() => {
               toast.loading("워크플로우 삭제 중...", { id: workflowId });
               deleteMutation.mutate(workflowId);
             }}
