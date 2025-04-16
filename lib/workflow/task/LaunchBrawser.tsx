@@ -17,4 +17,10 @@ export const LaunchBrowserTask = {
       hideHandle: false,
     },
   ],
+  outputs: [
+    {
+      name: "Web Page",
+      type: TaskParamType.BROWSER_INSTANCE,
+    },
+  ],
 };
