@@ -7,7 +7,7 @@ export const PageToHtmlTask = {
   icon: (props: LucideIcon) => (
     <GlobeIcon className="stroke-pink-400" {...props} />
   ),
-  isEntryPoint: true,
+
   inputs: [
     {
       name: "Web page",
