@@ -95,45 +95,48 @@ function FlowEditor({ workflow }: { workflow: Workflow }) {
 
   // 노드끼리 엣지를 연결할 때마다 처리되는 유효성 검사
   //true면 연결 허용, false면 연결불가
-  const isValidConnection = useCallback((connection: Edge | Connection) => {
-    // 노드가 자기 자신을 연결할 수 없도록 체크
-    if (connection.source === connection.target) {
-      return false;
-    }
-
-    // 같은 테스크끼리만 연결 안되도록 처리( 예:html <-> html)
-    const source = nodes.find((node) => node.id === connection.source);
-    const target = nodes.find((node) => node.id === connection.target);
-    if (!source || !target) {
-      return false;
-    }
-
-    const sourceTask = TaskRegistry[source.data.type];
-    const targetTask = TaskRegistry[target.data.type];
-    const output = sourceTask.outputs.find(
-      (o) => o.name === connection.sourceHandle
-    );
-    const input = targetTask.inputs.find(
-      (o) => o.name === connection.targetHandle
-    );
-
-    if (input?.type !== output?.type) {
-      console.log("invalid edge");
-      return false;
-    }
-    const hasCycle = (node: AppNode, visited = new Set()) => {
-      if (visited.has(node.id)) return false;
-      visited.add(node.id);
-
-      for (const outgoer of getOutgoers(node, nodes, edges)) {
-        if (outgoer.id === connection.source) return true;
-        if (hasCycle(outgoer, visited)) return true;
+  const isValidConnection = useCallback(
+    (connection: Edge | Connection) => {
+      // 노드가 자기 자신을 연결할 수 없도록 체크
+      if (connection.source === connection.target) {
+        return false;
       }
-    };
-    const detectedCycle = hasCycle(target);
 
-    return !detectedCycle;
-  }, []);
+      // 같은 테스크끼리만 연결 안되도록 처리( 예:html <-> html)
+      const source = nodes.find((node) => node.id === connection.source);
+      const target = nodes.find((node) => node.id === connection.target);
+      if (!source || !target) {
+        return false;
+      }
+
+      const sourceTask = TaskRegistry[source.data.type];
+      const targetTask = TaskRegistry[target.data.type];
+      const output = sourceTask.outputs.find(
+        (o) => o.name === connection.sourceHandle
+      );
+      const input = targetTask.inputs.find(
+        (o) => o.name === connection.targetHandle
+      );
+
+      if (input?.type !== output?.type) {
+        console.log("invalid edge");
+        return false;
+      }
+      const hasCycle = (node: AppNode, visited = new Set()) => {
+        if (visited.has(node.id)) return false;
+        visited.add(node.id);
+
+        for (const outgoer of getOutgoers(node, nodes, edges)) {
+          if (outgoer.id === connection.source) return true;
+          if (hasCycle(outgoer, visited)) return true;
+        }
+      };
+      const detectedCycle = hasCycle(target);
+
+      return !detectedCycle;
+    },
+    [nodes, edges]
+  );
 
   return (
     <main className="h-full w-full">
