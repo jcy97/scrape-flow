@@ -3,7 +3,7 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "./node_modules/.prisma/client"
+  output   = "../node_modules/.prisma/client"
 }
 
 datasource db {
@@ -22,7 +22,43 @@ model Workflow {
   createdAt DateTime @default(now())
   updateAt  DateTime @updatedAt
 
+  executions WorkflowExecution[]
+
   // User cannot have two workflows with the same name
   // name과 userId는 항상 고유해야한다. (복합고유조건)
   @@unique([name, userId])
+}
+
+model WorkflowExecution{
+  id String @id @default(cuid())
+  workflowId String
+  userId String
+  trigger String
+  status String
+  createdAt DateTime @default(now())
+  startedAt DateTime?
+  completedAt DateTime?
+
+  phases ExecutionPhase[]
+
+
+  workflow Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+}
+
+model ExecutionPhase{
+  id String @id @default(cuid())
+  userId String
+  status String
+  number Int
+  node String
+  name String
+  startedAt DateTime?
+  completedAt DateTime?
+  inputs String?
+  outputs String?
+
+  creditsCost Int?
+  
+  workflowExecutionId String
+  execution WorkflowExecution @relation(fields: [workflowExecutionId], references: [id], onDelete: Cascade)
 }
