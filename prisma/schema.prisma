@@ -50,14 +50,14 @@ model ExecutionPhase{
   userId String
   status String
   number Int
-  node String
+node String
   name String
   startedAt DateTime?
   completedAt DateTime?
   inputs String?
   outputs String?
 
-  creditsCost Int?
+  creditsConsumed Int?
   
   workflowExecutionId String
   execution WorkflowExecution @relation(fields: [workflowExecutionId], references: [id], onDelete: Cascade)
