@@ -18,11 +18,11 @@ export const LaunchBrowserTask = {
       required: true,
       hideHandle: false,
     },
-  ],
+  ] as const, //항상 inputs은 고정된 값을 갖도록 처리..
   outputs: [
     {
       name: "Web Page",
       type: TaskParamType.BROWSER_INSTANCE,
-    },
+    } as const,
   ],
 } satisfies WorkflowTask;
