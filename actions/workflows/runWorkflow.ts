@@ -9,6 +9,7 @@ import {
   WorkflowExcutionPlan,
   WorkflowExecutionStatus,
   WorkflowExecutionTrigger,
+  WorkflowStatus,
 } from "@/types/workflow";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
@@ -39,21 +40,32 @@ export async function RunWorkflow(form: {
   }
 
   let executionPlan: WorkflowExcutionPlan;
-  if (!flowDefinition) {
-    throw new Error("flow error");
+  let workflowDefinition = flowDefinition;
+  if (workflow.status === WorkflowStatus.PUBLISHED) {
+    if (!workflow.executionPlan) {
+      throw new Error("no execution plan found in published workflow");
+    }
+    executionPlan = JSON.parse(workflow.executionPlan);
+    workflowDefinition = workflow.definition;
+  } else {
+    // workflow is a draft
+    if (!flowDefinition) {
+      throw new Error("flow error");
+    }
+
+    const flow = JSON.parse(flowDefinition);
+    const result = FlowToExecutionPlan(flow.nodes, flow.edges);
+
+    if (result.error) {
+      throw new Error("flow definition novalid");
+    }
+
+    if (!result.executionPlan) {
+      throw new Error("no executio plan generated");
+    }
+    executionPlan = result.executionPlan;
   }
 
-  const flow = JSON.parse(flowDefinition);
-  const result = FlowToExecutionPlan(flow.nodes, flow.edges);
-
-  if (result.error) {
-    throw new Error("flow definition novalid");
-  }
-
-  if (!result.executionPlan) {
-    throw new Error("no executio plan generated");
-  }
-  executionPlan = result.executionPlan;
   const execution = await prisma.workflowExecution.create({
     data: {
       workflowId,
@@ -61,7 +73,7 @@ export async function RunWorkflow(form: {
       status: WorkflowExecutionStatus.PENDING,
       startedAt: new Date(),
       trigger: WorkflowExecutionTrigger.MANUAL,
-      definition: flowDefinition,
+      definition: workflowDefinition,
       phases: {
         // // 일반 map을 사용한 경우
         // const 배열 = [1, 2, 3];
