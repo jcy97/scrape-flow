@@ -18,7 +18,7 @@ import { connected } from "process";
 import { LogCollector } from "@/types/log";
 import { createLogCollector } from "../log";
 
-export async function ExecuteWorkflow(executionId: string) {
+export async function ExecuteWorkflow(executionId: string, nextRun?: Date) {
   const execution = await prisma.workflowExecution.findUnique({
     where: { id: executionId },
     include: { workflow: true, phases: true },
@@ -31,7 +31,7 @@ export async function ExecuteWorkflow(executionId: string) {
   //엣지 추출
   const edges = JSON.parse(execution.definition).edges as Edge[];
   const environment: Environment = { phases: {} };
-  await initializeWorkflowExecution(executionId, execution.workflowId);
+  await initializeWorkflowExecution(executionId, execution.workflowId, nextRun);
 
   await initializePhaseStatuses(execution);
 
@@ -67,7 +67,8 @@ export async function ExecuteWorkflow(executionId: string) {
 
 async function initializeWorkflowExecution(
   executionId: string,
-  workflowId: string
+  workflowId: string,
+  nextRunAt?: Date
 ) {
   await prisma.workflowExecution.update({
     where: { id: executionId },
@@ -85,6 +86,7 @@ async function initializeWorkflowExecution(
       lastRunAt: new Date(),
       lastRunStatus: WorkflowExecutionStatus.RUNNING,
       lastRunId: executionId,
+      ...(nextRunAt && { nextRunAt }),
     },
   });
 }
