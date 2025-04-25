@@ -39,6 +39,8 @@ function CreateCredentialDialog({ triggerText }: { triggerText: string }) {
     mutationFn: CreateCredentials,
     onSuccess: () => {
       toast.success("자격증명이 생성되었습니다.", { id: "create-credential" });
+      form.reset();
+      setOpen(false);
     },
     onError: () => {
       toast.error("자격증명 생성 실패하였습니다.", { id: "create-credential" });
@@ -53,13 +55,7 @@ function CreateCredentialDialog({ triggerText }: { triggerText: string }) {
     [mutate]
   );
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(open) => {
-        form.reset();
-        setOpen(open);
-      }}
-    >
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button>{triggerText ?? "새 자격증명"}</Button>
       </DialogTrigger>
